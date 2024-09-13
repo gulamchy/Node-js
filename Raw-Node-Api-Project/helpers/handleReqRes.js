@@ -12,6 +12,7 @@ const url                   = require('url');
 const {StringDecoder}       = require('string_decoder');
 const routes                = require('../routes');
 const {notFoundHandler}     = require('../handlers/routeHandlers/notFoundHandler');
+const {parseJSON}           = require('../helpers/utilities');
 
 // Handle object -  Module Scaffolding
 const handler = {}
@@ -48,21 +49,6 @@ handler.handleReqRes = (req, res) => {
    const queryStringObj = parsedUrl.query;
    const headersObj     = req.headers;
 
-   // Body Object 
-   const decoder        = new StringDecoder('utf-8');
-   let realData         = '';
-
-   req.on('data', (buffer) => {
-        realData        += decoder.write(buffer);
-   })
-   // when buffer ends, turn off the decoder and write to the file. 
-   req.on('end', (buffer) => {
-        realData        += decoder.end();
-
-        // Response Handle
-        res.end('Hello Programmers');
-   })
-
 
     /*
         Routing Logic:
@@ -86,19 +72,36 @@ handler.handleReqRes = (req, res) => {
    };
    
    // Choose handler based on the trimmed path or default to notFoundHandler
-   const chosenHandler = routes[trimmedPath] ? routes[trimmedPath] : notFoundHandler;
-   // Execute the handler
-   chosenHandler(requestProperties, (statusCode, payload) => {
-        statusCode  = typeof(statusCode) === 'number' ? statusCode : 500;
-        payload     = typeof(payload) === 'object'? payload : {};
+   const chosenHandler  = routes[trimmedPath] ? routes[trimmedPath] : notFoundHandler;
+   
 
-        // We can't send it as valid json object, we need to convert it to string (stringify).
-        const payloadString = JSON.stringify(payload);
+   // Body Object 
+   const decoder        = new StringDecoder('utf-8');
+   let realData         = '';
 
-        // Return the final response
-        res.writeHead(statusCode);
-        res.end(payloadString);
-   });
+   req.on('data', (buffer) => {
+        realData        += decoder.write(buffer);
+   })
+   
+   // when buffer ends, turn off the decoder and write to the file. 
+   req.on('end', (buffer) => {
+        realData        += decoder.end();
+        requestProperties.body = parseJSON(realData);
+
+        // Execute the handler
+        chosenHandler(requestProperties, (statusCode, payload) => {
+            statusCode  = typeof(statusCode) === 'number' ? statusCode : 500;
+            payload     = typeof(payload) === 'object'? payload : {};
+
+            // We can't send it as valid json object, we need to convert it to string (stringify).
+            const payloadString = JSON.stringify(payload);
+
+            // Return the final response
+            res.setHeader('Content-Type', 'application/json')
+            res.writeHead(statusCode);
+            res.end(payloadString);
+        });
+   })
 
 
 }
