@@ -11,7 +11,6 @@
 const https = require('https');
 const { twilio } = require('./environments');
 const querystring = require('querystring');
-const { hostname } = require('os');
 
 // Module Scaffolding
 const notifications = {};
@@ -28,7 +27,7 @@ notifications.sendTwilioSms = (phone, msg, callback) => {
         const payload = {
             Body: userMsg,
             From: twilio.fromPhone,
-            To: userPhone,
+            To: `+${userPhone}`,
         };
 
         // Stringify the payload

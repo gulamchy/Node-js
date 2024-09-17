@@ -8,51 +8,28 @@
 */
 
 // Dependencies
-const http               = require('http');
-const {handleReqRes}     = require('./helpers/handleReqRes');  
-const environment        = require('./helpers/environments');
-const data               = require('./lib/data');
-const { sendTwilioSms }  = require('./helpers/notificaton');
+const servers = require('./lib/server');
+const workers = require('./lib/worker');
+const {sendTwilioSms} = require('../Raw-Node-Api-Project/helpers/notificaton');
 
 // App object - Module Scaffolding
 const app = {};
 
-// Configuration
-app.config = {};
+// Function Initialization
+app.init = () => {
+    // Start the server
+    servers.init();
 
-// Test File System
-// data.create('test','newFile', {'name': 'Bangladesh', 'Language': 'Bangla'}, (createError) => {
-//     console.log(`error was`, createError);
-// });
-// data.read('test','newFile', (readError, data) => {
-//     console.log(readError, data);
-// });
-
-// data.update('test','newFile', {'name': 'India', 'Language': 'Hindi'}, (updateError) => {
-//     console.log(`error was`, updateError);
-// });
-// data.delete('test','newFile',(deleteError) => {
-//     console.log(`error was`, deleteError);
-// });
-
-// sendTwilioSms('+18777804236', 'My Name is Gulam', (error) => {
-//     console.log(`${error}`);
-// });
-
-
-
-// Create Server 
-app.createServer = () => {
-    const server = http.createServer(app.handleReqRes);
-
-    // Listening on server
-    server.listen(environment.port, () => {
-        console.log(`Listening on port ${environment.port}`);
-    })
+    // Start the workers
+    workers.init();
 }
 
 // Handle Request Response
-app.handleReqRes = handleReqRes;
+app.init();
 
-// Start the server
-app.createServer();
+// sendTwilioSms('18777804236', 'My Name is Gulam', (error) => {
+//     console.log(`${error}`);
+// });
+
+// Export the module ( not neccessary but good practice )
+module.exports = app;

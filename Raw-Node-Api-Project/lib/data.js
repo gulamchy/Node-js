@@ -105,6 +105,24 @@ dataLib.delete = (dir, file, callback) => {
     } )
 };
 
+// List all the items in a directory
+dataLib.listOfFiles = (dir, callback) => {
+    fs.readdir(`${dataLib.baseDir + dir}/`, (isReadError, fileNames) => {
+        if(!isReadError && fileNames && fileNames.length > 0) {
+            // Remove .json extension cause we only need the name of the file
+            const trimmedFileNames = [];
+            fileNames.forEach((fileName) => {
+                trimmedFileNames.push(fileName.replace('.json', ''));
+            });
+            callback(false, trimmedFileNames);
+
+
+        } else {
+            callback('Error reading directory');
+        }
+    })
+};
+
 // Exporting Module
 module.exports = dataLib;
 
