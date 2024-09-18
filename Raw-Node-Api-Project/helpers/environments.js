@@ -19,9 +19,9 @@ environments.staging = {
     secretKey: 'oghywkmshnbforjslrija',
     maxChecks: 5,
     twilio: {
-        fromPhone: '+18779163778',
-        accountSid: 'ACc05e14cdc4495c50a288c35293bf6a58',
-        authToken: '5a5ac121fd975771548fbb3102ca805f'
+        fromPhone: 'process.env.TWILIO_FROM_PHONE',
+        accountSid: 'process.env.TWILIO_ACCOUNT_SID',
+        authToken: 'process.env.TWILIO_AUTH_TOKEN'
     }
 };
 
@@ -31,9 +31,9 @@ environments.production = {
     secretKey: 'lgkidporsjigpwnfusmk',
     maxChecks: 5,
     twilio: {
-        fromPhone: '+18779163778',
-        accountSid: 'ACc05e14cdc4495c50a288c35293bf6a58',
-        authToken: '5a5ac121fd975771548fbb3102ca805f'
+        fromPhone: 'process.env.TWILIO_FROM_PHONE',
+        accountSid: 'process.env.TWILIO_ACCOUNT_SID',
+        authToken: 'process.env.TWILIO_AUTH_TOKEN'
     }
 };
 
