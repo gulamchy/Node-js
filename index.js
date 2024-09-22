@@ -11,6 +11,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const todoHandler = require("./routeHandler/todoHandler");
+const userHandler = require("./routeHandler/userHandler");
 
 // Database Connection
 mongoose.connect("mongodb://localhost/todos")
@@ -23,6 +24,7 @@ app.use(express.json());
 
 // Application Routes
 app.use("/todo", todoHandler);
+app.use("/user", userHandler);
 
 // Default error Handler
 const errorHandler = (err, req, res, next) => {
@@ -32,6 +34,7 @@ const errorHandler = (err, req, res, next) => {
     res.status(500).json({error: err});
 };
 
+app.use(errorHandler);
 // Listening to Server
 app.listen(3000, () => {
     console.log("Listening to port 3000...");

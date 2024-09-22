@@ -11,18 +11,23 @@
 const express = require("express");
 const mongoose = require("mongoose")
 const todoSchema = require("../schemas/todoSchemas");
+const userSchema = require("../schemas/userSchema");
+const checkLogin    = require("../middlewares/checkLogin");
 
 // Using express Router 
 const router = express.Router();
 
 // Construction Model from Schema - Todo is class and it's name should be singler not plural
 const Todo = new mongoose.model("Todo", todoSchema);
+const User = new mongoose.model("User", userSchema);
 
 
 // Get all the TODOs
-router.get('/', async(req, res) => {
+router.get('/', checkLogin, async(req, res) => {
     try {
-        const todos = await Todo.find({status: "active"}).select({
+        const todos = await Todo.find()
+        .populate("user", "name username -_id")
+        .select({
             _id: 0,
             __v: 0,
             date: 0
@@ -32,6 +37,32 @@ router.get('/', async(req, res) => {
     } catch(err) {
         res.status(400).json(`Error: Error fetching TODO, ${err} `);
     }
+});
+
+// Find all todo using method instance
+router.get("/active", async (req, res) => {
+    const todo = new Todo();
+    const data = await todo.findActive();
+    res.status(200).json({
+        data: data,
+    });
+});
+
+// Statics Instance
+router.get('/js', async (req, res) => {
+    const data = await Todo.findByJS();
+    res.status(200).json({
+        data: data,
+    });
+});
+
+// Query Helper
+router.get('/lang', async (req, res) => {
+    const data = await Todo.find().byLanguage("react");
+    res.status(200).json({
+        data: data,
+    });
+
 });
 
 // Get a the TODO by ID
@@ -49,10 +80,20 @@ router.get('/:id', async(req, res) => {
 });
 
 // Post single the TODO
-router.post('/', async(req, res) => {
+router.post('/', checkLogin, async(req, res) => {
     try{
-        const newTodo = new Todo(req.body);
+        const newTodo = new Todo({
+            ...req.body,
+            user: req.userId,
+        });
         const saveTodo = await newTodo.save();
+        await User.updateOne({
+            _id: req.userId
+        }, {
+            $push: {
+                todos: saveTodo.id,
+            }
+        });
         res.status(201).json(`${saveTodo.title} - successfully inserted!`);
     } catch(err){
         res.status(400).json(`Error: Error inserting TODO, ${err} `);
